@@ -1,6 +1,6 @@
 {
   "name": "@sinet/core-component",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "description": "Contains common core files for sinet angular components",
   "files": [
     "dist/"
@@ -18,5 +18,21 @@
   "bugs": {
     "url": "https://github.com/sinet/core-component/issues"
   },
-  "homepage": "https://github.com/sinet/core-component#readme"
+  "homepage": "https://github.com/sinet/core-component#readme",
+  "dependencies": {
+    "gulp": "3.9.1",
+    "gulp-angular-templatecache": "^2.0.0",
+    "gulp-bump": "^2.7.0",
+    "gulp-clean": "^0.3.2",
+    "gulp-concat": "^2.6.1",
+    "gulp-concat-css": "^2.3.0",
+    "gulp-git": "^2.4.0",
+    "gulp-less": "^3.3.0",
+    "gulp-minify-css": "^1.2.4",
+    "gulp-ng-annotate": "^2.0.0",
+    "gulp-protractor": "^4.1.0",
+    "gulp-uglify": "^3.0.0",
+    "gulp-wrap-js": "^0.4.1",
+    "yargs": "^8.0.1"
+  }
 }
