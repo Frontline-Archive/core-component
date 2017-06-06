@@ -8,7 +8,6 @@ module.exports = function ( gulp, karma ) {
 	var minifyCSS     = require( 'gulp-minify-css' );
 	var concatCSS     = require( 'gulp-concat-css' );
 	var annotate      = require( 'gulp-ng-annotate' );
-	var templateCache = require( 'gulp-angular-templatecache' );
 	var wrap          = require( 'gulp-wrap-js' );
 	var protractor    = require( 'gulp-protractor' ).protractor;
 	var spawn         = require( 'child_process' ).spawn;
@@ -18,20 +17,11 @@ module.exports = function ( gulp, karma ) {
 	var fs            = require( 'fs' );
 	var path          = require( 'path' );
 
-	var distDir  = process.cwd() + '/dist';
+	var distDir = 'dist';
 
 	function cleanDist () {
 		return gulp.src( './dist/*.*' )
 			.pipe( clean( { 'force' : true } ) );
-	}
-
-	function template () {
-		return gulp.src( [ './src/app/**/*.html', './src/app/**/partials/*.js' ] )
-			.pipe( templateCache( 'templates.js', {
-				'root'   : '/templates',
-				'module' : 'dashboard-template'
-			} ) )
-			.pipe( gulp.dest( path.join( process.cwd(), distDir ) ) );
 	}
 
 	function js () {
@@ -168,9 +158,6 @@ module.exports = function ( gulp, karma ) {
 
 	// Dist cleanup
 	gulp.task( 'clean:dist', cleanDist );
-
-	// Template Builds after dist cleanup
-	gulp.task( 'template', [ 'clean:dist' ], template );
 
 	// JS concatination and uglification after dist cleanup
 	gulp.task( 'js', [ 'clean:dist' ], js );
