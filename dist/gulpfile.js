@@ -122,8 +122,8 @@ module.exports = function ( gulp, karma ) {
 
 	function updateFiles () {
 		var version   = getCurrentVersion();
-		var readMe    = String( fs.readFileSync( './README.md' ) ).replace( /version-(.[0-9])*/g, 'version-v' + version );
-		var appModule = String( fs.readFileSync( './src/app/app.module.js' ) ).replace( /\'[0-9]+(.[0-9]){2}\'/g, '\'' + version + '\'' );
+		var readMe    = String( fs.readFileSync( './README.md' ) ).replace( /version-v[0-9]+(.[0-9]*){2}/g, 'version-v' + version );
+		var appModule = String( fs.readFileSync( './src/app/app.module.js' ) ).replace( /\'[0-9]+(.[0-9]*){2}\'/g, '\'' + version + '\'' );
 
 		fs.writeFileSync( './README.md', readMe );
 		fs.writeFileSync( './src/app/app.module.js', appModule );
