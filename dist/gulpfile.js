@@ -16,6 +16,7 @@ module.exports = function ( gulp, karma ) {
 	var git           = require( 'gulp-git' );
 	var fs            = require( 'fs' );
 	var path          = require( 'path' );
+	var request       = require( 'request' );
 
 	var distDir = 'dist';
 
@@ -109,9 +110,27 @@ module.exports = function ( gulp, karma ) {
 	}
 
 	function npmBuild ( done ) {
-		git.exec( { 'args' : 'log -n 1 --pretty=format:"%s"' }, function ( err, title ) {
-			if ( title.match( /(chore: bump to v)[0-9]+(.[0-9]+){2}$/ ) ) {
-				spawn( 'npm', [ 'publish' ], { 'stdio' : 'inherit' } ).on( 'close', done );
+		git.exec( { 'args' : 'log -n 1 --pretty=format:"%H|||%s"' }, function ( err, commit ) {
+			commit = commit.split( '|||' );
+
+			var url = 'https://api.github.com/repos/sinet/'
+				+ process.env.git_repo_name
+				+ '/commits/'
+				+ commit[ 0 ]
+				+ '?access_token='
+				+ process.env.GITHUB_TOKEN;
+
+			var options = {
+				'url'     : url,
+				'headers' : { 'User-Agent' : 'sinet' }
+			};
+
+			if ( commit[ 1 ].match( /(chore: bump to v)[0-9]+(.[0-9]+){2}$/ ) ) {
+				request( options, function ( err, response ) {
+					if ( response && response.statusCode === 200 ) {
+						spawn( 'npm', [ 'publish' ], { 'stdio' : 'inherit' } ).on( 'close', done );
+					}
+				} );
 			}
 		} );
 	}
