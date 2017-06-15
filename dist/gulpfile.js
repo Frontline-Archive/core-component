@@ -10,12 +10,13 @@ module.exports = function ( gulp, karma ) {
 	var annotate      = require( 'gulp-ng-annotate' );
 	var wrap          = require( 'gulp-wrap-js' );
 	var protractor    = require( 'gulp-protractor' ).protractor;
-	var spawn         = require( 'child_process' ).spawn;
+	var exec          = require( 'child_process' ).exec;
 	var bump          = require( 'gulp-bump' );
 	var argv          = require( 'yargs' ).argv;
 	var git           = require( 'gulp-git' );
 	var fs            = require( 'fs' );
 	var path          = require( 'path' );
+	var runSequence   = require('run-sequence').use( gulp );
 
 	var distDir = 'dist';
 
@@ -111,9 +112,15 @@ module.exports = function ( gulp, karma ) {
 	function npmBuild ( done ) {
 		git.exec( { 'args' : 'log -n 1 --pretty=format:"%s"' }, function ( err, commit ) {
 			if ( commit.match( /(chore: bump to v)[0-9]+(.[0-9]+){2}$/ ) && !( process.env.CI_PULL_REQUEST || '' ).replace( /\s/g, '' ).length ) {
-				spawn( 'npm', [ 'publish' ], { 'stdio' : 'inherit' } )
-					.on( 'error', console.log )
-					.on( 'close', done );
+				var child = exec( 'npm publish' );
+
+				child.stdout.on( 'data', console.log );
+				child.stderr.on( 'data', console.log );
+
+				child.on( 'close', function () {
+					// never pass any argument to `done` to allow ci to pass always
+					done();
+				} );
 			}
 		} );
 	}
@@ -131,7 +138,7 @@ module.exports = function ( gulp, karma ) {
 		fs.writeFileSync( './src/app/app.module.js', appModule );
 	}
 
-	function bumpBuild ( cb ) {
+	function bumpBuild () {
 		var bumpType = argv.type;
 		var type     = null;
 
@@ -152,11 +159,9 @@ module.exports = function ( gulp, karma ) {
 		return gulp.src('.').pipe( git.commit( 'chore: bump to v' + getCurrentVersion() ) );
 	}
 
-	gulp.task( 'add', [ 'updateFile' ], addAll );
-
-	gulp.task( 'updateFile', [ 'bumpBuild' ], updateFiles );
-
-	gulp.task('commit', [ 'add' ], commit );
+	function bumpSequence ( done ) {
+		runSequence( 'bumpBuild', 'updateFiles', 'build', 'addToCommit', 'commit', done );
+	}
 
 	// Dist cleanup
 	gulp.task( 'clean:dist', cleanDist );
@@ -191,12 +196,18 @@ module.exports = function ( gulp, karma ) {
 	// Run test once and exit
 	gulp.task( 'test', [ 'unit', 'e2e' ] );
 
+	// tasks for automating bump with commit
+	// adds all changes
+	gulp.task( 'addToCommit', addAll );
+	// updates readme and app.module
+	gulp.task( 'updateFiles', updateFiles );
+	// creates commit for bump
+	gulp.task('commit', commit );
 	// bump package version
-	gulp.task( 'bumpBuild', [ 'build' ], bumpBuild );
-
+	gulp.task( 'bumpBuild', bumpBuild );
 	// bump and commit
-	gulp.task( 'bump', [ 'commit' ] );
+	gulp.task( 'bump', bumpSequence);
 
 	// publish bumped version to npm
 	gulp.task( 'publish', npmBuild );
-}
+};

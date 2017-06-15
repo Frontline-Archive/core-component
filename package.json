@@ -1,6 +1,6 @@
 {
   "name": "@sinet/core-component",
-  "version": "1.0.6",
+  "version": "1.0.7",
   "description": "Contains common core files for sinet angular components",
   "files": [
     "dist/"
@@ -32,6 +32,7 @@
     "gulp-protractor": "^4.1.0",
     "gulp-uglify": "^3.0.0",
     "gulp-wrap-js": "^0.4.1",
+    "run-sequence": "^1.2.2",
     "yargs": "^8.0.1"
   }
 }
